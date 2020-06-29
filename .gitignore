@@ -1,0 +1,5 @@
+vars.json
+manifest*.json
+*.plan
+*.tfstate*
+.terraform
