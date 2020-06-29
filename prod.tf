@@ -1,76 +1,45 @@
-provider "aws" {
-  profile = "default"
-  region  = "eu-west-2"
+variable "region" {
+  type = string
+}
+variable "image_id" {
+  type = string
+}
+variable "instance_name" {
+  type = string
+}
+variable "instance_type" {
+  type = string
+}
+variable "subnet_id" { # X2
+  type = string
+}
+variable "key_pair" { # X2
+  type = string
+}
+variable "pcs" {
+  type = number
 }
 
-resource "aws_s3_bucket" "erez-tf-course" {
-  bucket = "erez-tf-course"
-  acl    = "private"
-}
-
-data "aws_vpc" "aob-main" { # get data
-  id = "vpc-006a34a4d7a2a356c"
-}
-
-data "aws_subnet" "aob-main" { # get data
-  id = "subnet-050842545d0fce2d4"
-}
-
-resource "aws_security_group" "prod_web" {
-  name        = "prod_web"
-  description = "Allow standard http and https ports inbound and everything outbound"
-  vpc_id      = data.aws_vpc.aob-main.id # use variable
+module "instance_deploy" {
+  source = "./modules/instance_deploy"
   
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  
-  tags = {
-    "Terraform" : "true"
-  }
-}
-  
-resource "aws_instance" "prod_web" {
-  count = 3
-
-  ami           = "ami-032598fcc7e9d1c7a"
-  instance_type = "t2.nano"
-  subnet_id     = data.aws_subnet.aob-main.id
-  key_name      = "Erez-AOB-def"
-  
-  vpc_security_group_ids = [
-    aws_security_group.prod_web.id
-  ]
-
-  tags = {
-    "Terraform" : "true"
-    "Name"      : "tf-test"
-  }
+  region        = var.region
+  image_id      = var.image_id
+  instance_name = var.instance_name
+  instance_type = var.instance_type
+  subnet_id     = var.subnet_id
+  key_pair      = var.key_pair
+  pcs           = var.pcs
 }
 
-resource "aws_instance" "aob_ppk" {
-
-  ami           = "ami-032598fcc7e9d1c7a"
-  instance_type = "t2.nano"
-  key_name      = "Erez-AOB-def"
+module "instance_deploy_frank" {
+  source = "./modules/instance_deploy"
   
-  tags = {
-    "Terraform" : "true"
-    "Name"      : "tf-test"
-  }
+  region        = "eu-central-1"
+  image_id      = "ami-0a02ee601d742e89f"
+  instance_name = var.instance_name
+  instance_type = var.instance_type
+  subnet_id     = "subnet-0dbd84f0b33d6ad33"
+  key_pair      = "aob-frank"
+  pcs           = var.pcs
 }

@@ -13,6 +13,8 @@ terraform apply
 terraform apply <filename>
 # auto approve
 terraform apply -auto-approve
+# pass a variable
+terraform apply -var="<var_name>=<var_value>" / -var-file=<filename>
 ```
 
 Generates an execution plan for tf
@@ -57,3 +59,4 @@ terraform destroy
 * blank line between diffrent code type
 * group single arguments together
 * line up the equal signs
+* resource name: snake_case
